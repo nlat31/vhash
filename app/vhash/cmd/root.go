@@ -15,6 +15,7 @@ import (
 
 var rootContext struct {
 	hash string
+	show bool
 }
 
 func hashMethod(hashName string) hash.Hash {
@@ -40,6 +41,9 @@ var rootCmd = &cobra.Command{
 			fmt.Println(err.Error())
 			return
 		}
+		if rootContext.show {
+			fmt.Println(string(text))
+		}
 		count, err := strconv.ParseInt(string(text), 10, 64)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -54,6 +58,9 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println(err.Error())
 			return
+		}
+		if rootContext.show {
+			fmt.Println(string(text))
 		}
 		for i := int64(0); i < count; i++ {
 			alg := hashMethod(rootContext.hash)
@@ -81,4 +88,5 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().StringVar(&rootContext.hash, "hash", "md5", "使用的哈希算法(sha256, md5)")
+	rootCmd.Flags().BoolVar(&rootContext.show, "show", false, "显示输入内容")
 }
