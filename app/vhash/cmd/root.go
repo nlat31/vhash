@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"hash"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
 
 var rootContext struct {
-	hash  string
-	count int
+	hash string
 }
 
 func hashMethod(hashName string) hash.Hash {
@@ -30,21 +30,32 @@ func hashMethod(hashName string) hash.Hash {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "pwdgen",
+	Use:   "vhash",
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if rootContext.count < 1 {
-			fmt.Println("哈希次数必须大于1")
-			return
-		}
-		fmt.Println("请输入文本:")
+		fmt.Println("请输入哈希次数执行:")
 		text, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
-		for i := 0; i < rootContext.count; i++ {
+		count, err := strconv.ParseInt(string(text), 10, 64)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if count < 1 {
+			fmt.Println("哈希次数必须大于0")
+			return
+		}
+		fmt.Println("请输入文本:")
+		text, err = term.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		for i := int64(0); i < count; i++ {
 			alg := hashMethod(rootContext.hash)
 			if alg == nil {
 				return
@@ -70,5 +81,4 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().StringVar(&rootContext.hash, "hash", "md5", "使用的哈希算法(sha256, md5)")
-	rootCmd.Flags().IntVarP(&rootContext.count, "count", "c", 1, "哈希执行次数")
 }
